@@ -2,6 +2,7 @@ import Link from "next/link";
 
 type AdminPostRow = {
   id: number;
+  slug: string;
   title: string;
   published: boolean;
   updatedAt: Date;
@@ -58,7 +59,7 @@ export function PostTable({ posts }: PostTableProps) {
               <td className="px-4 py-3">
                 <div className="flex items-center gap-3">
                   <Link
-                    href={`/admin/posts/${post.id}/edit`}
+                    href={`/admin/posts/${post.slug}/edit`}
                     className="text-sm font-medium text-primary hover:underline"
                   >
                     Edit
