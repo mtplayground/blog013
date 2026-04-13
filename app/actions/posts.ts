@@ -142,3 +142,28 @@ export async function updatePost(
   revalidatePath(`/admin/posts/${originalSlug}/edit`);
   redirect(`/admin/posts/${parsed.data.slug}/edit`);
 }
+
+export async function deletePost(formData: FormData): Promise<void> {
+  const slugValue = formData.get("slug");
+  const slug = typeof slugValue === "string" ? slugValue.trim() : "";
+
+  if (!slug) {
+    return;
+  }
+
+  try {
+    await prisma.post.delete({
+      where: {
+        slug,
+      },
+    });
+  } catch (error: unknown) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025") {
+      return;
+    }
+
+    throw error;
+  }
+
+  revalidatePath("/admin");
+}

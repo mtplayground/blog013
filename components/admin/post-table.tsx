@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { DeleteButton } from "@/components/admin/delete-button";
 
 type AdminPostRow = {
   id: number;
@@ -64,12 +65,7 @@ export function PostTable({ posts }: PostTableProps) {
                   >
                     Edit
                   </Link>
-                  <Link
-                    href={`/admin/posts/${post.id}/delete`}
-                    className="text-sm font-medium text-destructive hover:underline"
-                  >
-                    Delete
-                  </Link>
+                  <DeleteButton slug={post.slug} title={post.title} />
                 </div>
               </td>
             </tr>
