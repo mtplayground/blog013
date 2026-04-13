@@ -1,6 +1,9 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { cache } from "react";
 
 import { MarkdownRenderer } from "@/components/markdown-renderer";
+import { buildPostMetadata } from "@/lib/metadata";
 import { prisma } from "@/lib/prisma";
 
 type PostDetailPageProps = {
@@ -8,6 +11,21 @@ type PostDetailPageProps = {
     slug: string;
   }>;
 };
+
+const getPublishedPostBySlug = cache(async (slug: string) => {
+  return prisma.post.findFirst({
+    where: {
+      slug,
+      published: true,
+    },
+    select: {
+      title: true,
+      slug: true,
+      content: true,
+      createdAt: true,
+    },
+  });
+});
 
 function formatDate(date: Date): string {
   return new Intl.DateTimeFormat("en-US", {
@@ -20,17 +38,7 @@ function formatDate(date: Date): string {
 export default async function PostDetailPage({ params }: PostDetailPageProps) {
   const { slug } = await params;
 
-  const post = await prisma.post.findFirst({
-    where: {
-      slug,
-      published: true,
-    },
-    select: {
-      title: true,
-      content: true,
-      createdAt: true,
-    },
-  });
+  const post = await getPublishedPostBySlug(slug);
 
   if (!post) {
     notFound();
@@ -48,4 +56,27 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
       </article>
     </main>
   );
+}
+
+export async function generateMetadata({ params }: PostDetailPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const post = await getPublishedPostBySlug(slug);
+
+  if (!post) {
+    return {
+      title: "Post Not Found",
+      description: "The requested post could not be found.",
+      robots: {
+        index: false,
+        follow: false,
+      },
+    };
+  }
+
+  return buildPostMetadata({
+    title: post.title,
+    slug: post.slug,
+    content: post.content,
+    publishedAt: post.createdAt,
+  });
 }

@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
+import { getSiteDescription, getSiteName, getSiteUrl } from "@/lib/metadata";
 
 import "./globals.css";
 
@@ -17,8 +18,24 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ZeroClaw Blog",
-  description: "Blog platform built with Next.js",
+  metadataBase: new URL(getSiteUrl()),
+  title: {
+    default: getSiteName(),
+    template: `%s | ${getSiteName()}`,
+  },
+  description: getSiteDescription(),
+  openGraph: {
+    type: "website",
+    title: getSiteName(),
+    description: getSiteDescription(),
+    siteName: getSiteName(),
+    url: "/",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: getSiteName(),
+    description: getSiteDescription(),
+  },
 };
 
 export default function RootLayout({
