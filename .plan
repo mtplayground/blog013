@@ -1,0 +1,87 @@
+# Architecture Plan (Issues #1-#14)
+
+## 1) Module Structure and File Organization
+
+- App framework: Next.js App Router with TypeScript.
+- UI system: Tailwind CSS + shadcn/ui components.
+- Data layer: Prisma ORM with SQLite.
+- Auth: simple admin auth using server action + cookie/session guard via middleware.
+
+Proposed top-level structure:
+
+- `app/`
+  - `(public)/`
+    - `layout.tsx` (shared public header/footer)
+    - `page.tsx` (home, paginated list)
+    - `post/[slug]/page.tsx` (detail)
+  - `(admin)/admin/`
+    - `login/page.tsx`
+    - `page.tsx` (dashboard)
+    - `posts/new/page.tsx`
+    - `posts/[id]/edit/page.tsx`
+  - `api/` (optional if needed; prefer server actions where practical)
+  - `sitemap.ts`
+  - `robots.ts`
+  - `layout.tsx` (root)
+  - `globals.css`
+
+- `components/`
+  - `ui/` (shadcn generated components)
+  - `admin/` (post table, editor form, delete confirmation)
+  - `public/` (post list, pagination, metadata helpers)
+
+- `lib/`
+  - `prisma.ts` (singleton client)
+  - `auth.ts` (session helpers, password verify)
+  - `posts.ts` (post queries, pagination, CRUD utilities)
+  - `markdown.ts` (parse/render/sanitize helpers)
+  - `env.ts` (typed env reads)
+
+- `prisma/`
+  - `schema.prisma`
+  - `migrations/`
+
+- `types/`
+  - `post.ts` (DTO/view models)
+  - `auth.ts`
+
+- `tests/`
+  - `e2e/` (Playwright scenarios)
+
+- Root config/files:
+  - `Dockerfile`, `docker-compose.yml`, `.env.example`
+
+## 2) Shared Types
+
+- `PostSummary`: id, slug, title, excerpt, createdAt, updatedAt.
+- `PostDetail`: `PostSummary` + markdown body/html body.
+- `PostFormInput`: title, slug, content, published.
+- `PaginatedPosts`: items, page, pageSize, totalItems, totalPages.
+- `AuthSession`: authenticated flag + minimal admin identity.
+
+## 3) Dependencies Between Issues
+
+- #1 is base for all.
+- #2 depends on #1 and is prerequisite for #6-#10, #12-#14.
+- #3 can be done after #1; ideally before #14.
+- #4 depends on #1; #5 depends on #4.
+- #6 depends on #2 and #5.
+- #7 depends on #2, #5, #6.
+- #8 depends on #6/#7.
+- #9 depends on #2.
+- #10 depends on #2 and #9 data conventions (slug/detail route).
+- #11 should be in place before finalizing #9/#10 UX.
+- #12 depends on #9/#10/#11 content structure.
+- #13 depends on #9/#10 routing and metadata assumptions.
+- #14 depends on all prior issues and stable Docker/runtime setup.
+
+## 4) Key Design Decisions
+
+- Use App Router server components for read-heavy pages (home/detail/dashboard), server actions for admin mutations/auth where possible.
+- Keep Prisma access centralized in `lib/posts.ts` + `lib/prisma.ts` to avoid query duplication.
+- Use slug as public identifier; numeric id remains internal for admin editing/deleting.
+- Markdown pipeline should sanitize output before rendering to avoid XSS.
+- Auth should use HTTP-only secure cookie with middleware route protection for `/admin/*` except `/admin/login`.
+- Metadata generation should be route-level (`generateMetadata`) with consistent OG image/title/description fallback strategy.
+- `sitemap.ts` and `robots.ts` generated from canonical site URL env (`NEXT_PUBLIC_SITE_URL`).
+- E2E suite should cover auth flow, CRUD happy path, public list/detail rendering, SEO endpoints (`/sitemap.xml`, `/robots.txt`).
