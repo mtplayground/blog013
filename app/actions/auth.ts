@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 
-import { constantTimeEqual, createSession } from "@/lib/session";
+import { clearSession, constantTimeEqual, createSession } from "@/lib/session";
 
 export type LoginFormState = {
   error: string | null;
@@ -45,4 +45,9 @@ export async function login(
   }
 
   redirect("/admin");
+}
+
+export async function logout(): Promise<void> {
+  await clearSession();
+  redirect("/admin/login");
 }
