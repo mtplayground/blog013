@@ -35,8 +35,8 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-COPY --from=builder /app/prisma/dev.db /app/data/dev.db
 COPY start.sh /app/start.sh
+COPY .env ./.env
 
 RUN mkdir -p /app/data \
   && chmod +x /app/start.sh \
