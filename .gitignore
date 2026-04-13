@@ -6,12 +6,15 @@ out/
 
 # Environment and local runtime
 .gh_token
+.env
 .database_url
 .task_id
 .container_name
 .app_name
 .gh_user
 .github_token
+prisma/dev.db
+prisma/dev.db-journal
 
 # Tooling/project state
 .claude/
