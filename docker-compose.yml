@@ -1,8 +1,22 @@
 services:
+  migrate:
+    image: node:20-alpine
+    working_dir: /app
+    environment:
+      DATABASE_URL: file:/data/dev.db
+    volumes:
+      - ./:/app
+      - sqlite-data:/data
+    command: sh -c "npm ci --silent && npx prisma migrate deploy"
+    restart: "no"
+
   web:
     build:
       context: .
       dockerfile: Dockerfile
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
     ports:
       - "8080:8080"
     environment:
@@ -10,8 +24,9 @@ services:
       HOSTNAME: 0.0.0.0
       PORT: "8080"
       DATABASE_URL: file:/app/data/dev.db
-      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
-      SESSION_SECRET: ${SESSION_SECRET}
+      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost:8080}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123}
+      SESSION_SECRET: ${SESSION_SECRET:-change-me-session-secret}
     volumes:
       - sqlite-data:/app/data
     restart: unless-stopped
