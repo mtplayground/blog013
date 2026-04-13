@@ -1,13 +1,26 @@
+# Build and dependencies
 target/
 node_modules/
+.next/
+out/
+
+# Environment and local runtime
 .gh_token
-.claude/
 .database_url
 .task_id
 .container_name
 .app_name
 .gh_user
 .github_token
+
+# Tooling/project state
+.claude/
 .pipeline-state.json
-.gitkeep
 .progress
+.gitkeep
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
