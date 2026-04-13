@@ -1,0 +1,18 @@
+app = "blog013"
+primary_region = "iad"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_start = true
+  auto_stop = "stop"
+
+[env]
+  DATABASE_URL = "file:/app/data/dev.db"
+
+[mounts]
+  source = "data"
+  destination = "/app/data"
